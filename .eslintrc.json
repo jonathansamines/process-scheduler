@@ -1,0 +1,10 @@
+{
+  "extends": "airbnb-base",
+  "parserOptions": {
+    "sourceType": "script"
+  },
+  "rules": {
+    "max-len": 0,
+    "no-continue": 0
+  }
+}
