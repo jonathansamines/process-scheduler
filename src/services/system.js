@@ -1,10 +1,33 @@
 'use strict';
 
-class System {
-  constructor(processors, memorySlots) {
-    this.processors = processors || [];
-    this.memorySlots = memorySlots || [];
+const EventEmitter = require('events');
+
+const MONITOR_INTERVAL = 2000;
+
+class System extends EventEmitter {
+  constructor(options) {
+    super();
+
+    this.processors = options.processors || [];
+    this.memorySlots = options.memorySlots || [];
     this.devices = [];
+
+    let availableProcessor;
+    let availableMemory;
+
+    const monitorResources = () => {
+      try {
+        availableMemory = this.getAvailableMemorySlot();
+        availableProcessor = this.getAvailableProcessor();
+
+        return this.emit('state:resources-available', availableProcessor, availableMemory);
+      } catch (error) {
+        this.emit('state:insufficient-resources', error);
+        return setTimeout(monitorResources, MONITOR_INTERVAL);
+      }
+    };
+
+    process.nextTick(monitorResources);
   }
 
   /**
@@ -28,44 +51,26 @@ class System {
     if (!availableProcessor) {
       throw new Error('Not processors are available to be assigned. The workload has been exceeded.');
     }
+
+    return availableProcessor;
   }
 
   getAvailableMemorySlot() {
     const availableMemory = this.memorySlots.filter((memory) => (
-      memory.availableMemory() > 0
+      memory.availableMemory > 0
     )).pop();
 
     if (!availableMemory) {
       throw new Error('There is no memory available.');
     }
+
+    return availableMemory;
   }
 
   getTotalMemory() {
     return this.memorySlots.reduce((totalMemory, memory) => (
-      totalMemory + memory.availableMemory()
+      totalMemory + memory.availableMemory
     ), 0);
-  }
-
-  /**
-   *
-   * Allocates the specified memory if there is still memory available,
-   * if not throws an error
-   *
-   * @param {Number} memoryToAllocate totalMemory in bytes to allocate
-   */
-  allocateMemory(memoryToAllocate) {
-    const memory = this.getAvailableMemorySlot();
-    memory.allocate(memoryToAllocate);
-  }
-
-  /**
-   * De-Allocates the specified memory
-   *
-   * @param {Number} memoryToDeAllocate total memory in bytes to deallocate
-   */
-  deAllocateMemory(memoryToDeAllocate) {
-    const memory = this.getAvailableMemorySlot();
-    memory.deAllocate(memoryToDeAllocate);
   }
 }
 

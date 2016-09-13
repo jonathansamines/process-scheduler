@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "babel": "^6.5.2",
     "chai": "^3.5.0",
     "eslint": "^3.4.0",
     "eslint-config-airbnb-base": "^5.0.3",
