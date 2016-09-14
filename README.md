@@ -2,7 +2,7 @@
 A simple process scheduling simulator. The goal for this project is to get a basic but complete simulation of the process scheduling algorithm used by modern *Operative Systems*.
 
 ```bash
-  npm install --save process-scheduler-simulator
+  npm install --save process-scheduler
 ```
 
 ## Domain

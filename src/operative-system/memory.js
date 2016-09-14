@@ -1,9 +1,13 @@
 'use strict';
 
+const debug = require('debug')('process-scheduler:operative-system/memory');
+
 class PrimaryMemory {
   constructor(capacity) {
     this.capacity = capacity;
     this.consumedMemory = 0;
+
+    debug('creating memory with %s capacity', capacity);
   }
 
   /**
@@ -27,6 +31,8 @@ class PrimaryMemory {
     if (resultingMemory <= this.capacity) {
       this.consumedMemory += realMemoryToAllocate;
 
+      debug('allocated memory bytes: ', realMemoryToAllocate);
+
       return;
     }
 
@@ -40,6 +46,8 @@ class PrimaryMemory {
    */
   deAllocate(memoryToDeAllocate) {
     const resultingMemory = this.consumedMemory - Math.abs(memoryToDeAllocate);
+
+    debug('deallocating memory ', memoryToDeAllocate);
 
     this.consumedMemory = resultingMemory < 0 ? 0 : resultingMemory;
   }

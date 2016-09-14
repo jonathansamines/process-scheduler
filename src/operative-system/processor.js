@@ -1,7 +1,10 @@
 'use strict';
 
+const debug = require('debug')('process-scheduler:/operative-system/processor');
+
 class Processor {
   compute() {
+    debug('computing process');
   }
 
   /**

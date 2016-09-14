@@ -2,7 +2,9 @@
 
 const EventEmitter = require('events');
 
-const MONITOR_INTERVAL = 2000;
+const internals = {
+  MONITOR_INTERVAL: 2000,
+};
 
 class System extends EventEmitter {
   constructor(options) {
@@ -23,7 +25,7 @@ class System extends EventEmitter {
         return this.emit('state:resources-available', availableProcessor, availableMemory);
       } catch (error) {
         this.emit('state:insufficient-resources', error);
-        return setTimeout(monitorResources, MONITOR_INTERVAL);
+        return setTimeout(monitorResources, internals.MONITOR_INTERVAL);
       }
     };
 
