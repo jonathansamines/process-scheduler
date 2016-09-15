@@ -43,6 +43,7 @@ system.on('state:resources-available', (processor, memory) => {
 for (const number of [1, 2, 3]) {
   const PID = system.generatePID();
   const quantum = Math.ceil(Math.random() * 50) * 100;
+  const priority = Math.ceil(Math.random() * 10);
 
   const newProcess = new Process({
     fileName: `/path/to/the-file-${number}`,
@@ -53,7 +54,7 @@ for (const number of [1, 2, 3]) {
     },
   });
 
-  scheduler.schedule(PID, quantum, newProcess);
+  scheduler.schedule({ PID, quantum, priority }, newProcess);
   scheduler.on('transition:new', (pcb) => {
     console.log('New process [%s] created.', pcb.PID);
   });

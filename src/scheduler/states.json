@@ -7,8 +7,7 @@
         "name":"ADMITTED",
         "description":"The new process was admitted by the OS"
       }
-    ],
-    "queue":null
+    ]
   },
   "READY":{
     "name":"READY",
@@ -18,8 +17,7 @@
         "name":"RUN",
         "description":"The process resources assignment is done."
       }
-    ],
-    "queue":null
+    ]
   },
   "RUNNING":{
     "name":"RUNNING",
@@ -37,13 +35,11 @@
         "name":"INTERRUPTED",
         "description":"The process execution has been interrupted"
       }
-    ],
-    "queue":null
+    ]
   },
   "WAITING":{
     "name":"WAITING",
     "description":"Process is waiting for an external event to finish",
-    "queue":null,
     "transitions":[
       {
         "name":"RESUMED",
@@ -56,7 +52,6 @@
     "description":"Process finished",
     "transitions":[
 
-    ],
-    "queue":null
+    ]
   }
 }

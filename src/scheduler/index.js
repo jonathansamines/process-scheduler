@@ -7,53 +7,35 @@ const ControlBlock = require('./process-control-block');
 
 const internals = {
   SCHEDULE_INTERVAL: 10000,
+  queues: {
+    NEW: [],
+    TERMINATED: [],
+    RUNNING: [],
+    READY: [],
+    WAITING: [],
+  },
 };
 
-internals.processQueue = (opts) => {
-  let queueProcessingEnabled = true;
-
-  opts.reporter.emit(`transition:${opts.from.name.toLowerCase()}`, opts.from.queue);
-
+internals.processQueue = (options) => {
   const nextProcess = () => {
-    if (queueProcessingEnabled && opts.from.queue !== null) {
-      if (opts.allowTransition(opts.from.queue, opts.from.queue.next)) {
-        debug('transitioning to state %s', opts.to.name);
+    debug('trying to move process from [%s] to [%s]', options.origin.name, options.target.name);
+    const originQueue = internals.queues[options.origin.name];
+    const pcb = originQueue[originQueue.length - 1];
 
-        opts.to.queue = internals.dequeue(opts.from);
-        opts.reporter.emit(`transition:${opts.to.name.toLowerCase()}`, opts.to.queue);
+    if (pcb !== undefined) {
+      if (options.shouldTransition(options.origin, options.target, pcb)) {
+        debug('moving process from [%s] to [%s]', options.origin.name, options.target.name);
+
+        internals.queues[options.target.name].push(originQueue.pop());
+        options.reporter.emit(`transition:${options.target.name.toLowerCase()}`, pcb, options.target);
+        options.reporter.emit('transition', pcb, options.target);
       }
 
-      debug('retrying transition');
       setTimeout(nextProcess, internals.SCHEDULE_INTERVAL);
     }
   };
 
   process.nextTick(nextProcess);
-
-  return function stop() {
-    debug('disabling queue processing on stop call');
-
-    queueProcessingEnabled = false;
-  };
-};
-
-internals.dequeue = (from) => {
-  const top = from.queue;
-  if (top !== null) {
-    from.queue = top.next;
-
-    return top;
-  }
-
-  return null;
-};
-
-internals.queue = (from, controlBlock) => {
-  if (from.queue === null) {
-    from.queue = controlBlock;
-  } else {
-    from.queue.next = controlBlock;
-  }
 };
 
 class Scheduler extends EventEmitter {
@@ -62,31 +44,42 @@ class Scheduler extends EventEmitter {
    * Schedule a new process
    * @return {PCB} Returns the new PCB allocated for the provided process.
    */
-  schedule(PID, quantum, processToSchedule) {
-    const controlBlock = new ControlBlock(PID, quantum, processToSchedule);
+  schedule(meta, processToSchedule) {
+    const controlBlock = new ControlBlock(meta, processToSchedule);
 
-    debug('new PCB created with ID %s and quantum duration of %dms', PID, controlBlock.quantum);
+    debug('new PCB created with ID %s and quantum duration of %dms', controlBlock.PID, controlBlock.quantum);
 
-    const from = states.NEW;
-    const to = states.READY;
-
-    internals.queue(from, controlBlock);
+    internals.queues[controlBlock.state.name].push(controlBlock);
     internals.processQueue({
-      from,
-      to,
-      allowTransition: () => true,
       reporter: this,
+      origin: states.NEW,
+      target: states.READY,
+      shouldTransition: () => true,
     });
   }
 
   run(processor, memory) {
-    const from = states.READY;
-    const to = states.RUNNING;
+    this.once('transition:running', (pcbAllowedToRun) => {
+      pcbAllowedToRun.on('state-changed', (pcb, origin, target) => {
+        debug('moving process to ', pcb.state.name);
+
+        if (target === states.TERMINATED) return;
+        internals.processQueue({
+          origin,
+          target,
+          reporter: this,
+          shouldTransition: () => true,
+        });
+      });
+
+      pcbAllowedToRun.start();
+    });
 
     internals.processQueue({
-      from,
-      to,
-      allowTransition: (proc) => {
+      reporter: this,
+      origin: states.READY,
+      target: states.RUNNING,
+      shouldTransition(origin, target, proc) {
         try {
           debug('trying to allocate computing resources for process [%s, %s]', proc.memory, proc.computingTime);
 
@@ -96,29 +89,14 @@ class Scheduler extends EventEmitter {
           // assign resources to pcb
           proc.processor = processor;
 
-          this.once('transition:running', (runningProcess) => {
-            if (runningProcess !== proc) {
-              return;
-            }
-
-            runningProcess.start();
-
-            // schedule to waiting once the quantum expires
-            runningProcess.on('interrupted', () => {
-              debug('moving process to ', states.WAITING.name);
-              internals.queue(states.WAITING, proc);
-            });
-          });
-
           return true;
         } catch (e) {
-          debug('Disallowing transition to %s due insufficient resorces', to.name);
+          debug('Disallowing transition to %s due insufficient resorces', target.name);
           debug(e);
 
           return false;
         }
       },
-      reporter: this,
     });
   }
 }
