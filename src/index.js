@@ -43,15 +43,15 @@ system.on('state:resources-available', (processor, memory) => {
 for (const number of [1, 2, 3]) {
   const PID = system.generatePID();
   const quantum = Math.ceil(Math.random() * 50) * 100;
+  const computingTime = Math.ceil(Math.random() * 10) * quantum;
   const priority = Math.ceil(Math.random() * 10);
 
   const newProcess = new Process({
+    computingTime,
     fileName: `/path/to/the-file-${number}`,
     name: `the-process-${number}`,
     compute: (cb) => {
-      const timeout = Math.ceil(Math.random() * 10) * quantum;
-      console.log('Computing time: ', timeout);
-      return setTimeout(cb, timeout);
+      return setTimeout(cb, this.computingTime);
     },
   });
 
