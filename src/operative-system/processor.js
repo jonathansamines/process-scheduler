@@ -3,6 +3,10 @@
 const debug = require('debug')('process-scheduler:/operative-system/processor');
 
 class Processor {
+  constructor() {
+    debug('creating new processor');
+  }
+
   compute() {
     debug('computing process');
   }

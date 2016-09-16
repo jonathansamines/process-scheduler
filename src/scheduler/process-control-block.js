@@ -31,7 +31,7 @@ class ProcessControlBlock extends EventEmitter {
     // next PCB in the queue set to null
     this.next = null;
 
-    this.once('started', () => {
+    this.on('started', () => {
       if (this.process.needsResource) {
         const externalEventTimeout = Math.ceil(Math.random() * 4000);
 

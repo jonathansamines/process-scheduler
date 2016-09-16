@@ -7,10 +7,12 @@ const Processor = require('./operative-system/processor');
 const Scheduler = require('./scheduler');
 
 const PRIMARY_MEMORY_CAPACITY = 4096;
+const primaryProcessor = new Processor();
+const primaryMemory = new PrimaryMemory(PRIMARY_MEMORY_CAPACITY);
 const scheduler = new Scheduler();
 const system = new System({
-  processors: [new Processor()],
-  memorySlots: [new PrimaryMemory(PRIMARY_MEMORY_CAPACITY)],
+  processors: [primaryProcessor],
+  memorySlots: [primaryMemory],
 });
 
 system.on('state:insufficient-resources', (err) => {
