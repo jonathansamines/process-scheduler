@@ -1,6 +1,7 @@
 'use strict';
 
 const EventEmitter = require('events');
+const debug = require('debug')('process-scheduler:operative-system/index');
 
 const internals = {
   MONITOR_INTERVAL: 2000,
@@ -14,6 +15,8 @@ class System extends EventEmitter {
     this.memorySlots = options.memorySlots || [];
     this.devices = [];
 
+    debug('setting operative system with [%s] primary memories and [%] processors', this.processors.length, this.memorySlots.length);
+
     let availableProcessor;
     let availableMemory;
 
@@ -21,6 +24,8 @@ class System extends EventEmitter {
       try {
         availableMemory = this.getAvailableMemorySlot();
         availableProcessor = this.getAvailableProcessor();
+
+        debug('resources are available on system');
 
         return this.emit('state:resources-available', availableProcessor, availableMemory);
       } catch (error) {
@@ -51,7 +56,7 @@ class System extends EventEmitter {
       )).pop();
 
     if (!availableProcessor) {
-      throw new Error('Not processors are available to be assigned. The workload has been exceeded.');
+      throw new Error('No processors are available to be assigned. The workload has been exceeded.');
     }
 
     return availableProcessor;

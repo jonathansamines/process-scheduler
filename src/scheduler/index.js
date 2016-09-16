@@ -17,7 +17,7 @@ const internals = {
 };
 
 internals.processQueue = (options) => {
-  debug('processing queue [%s] to [%s]', options.origin.name, options.target.name);
+  debug('processing queue [%s]', options.origin.name);
 
   const nextProcess = () => {
     const originQueue = internals.queues[options.origin.name];

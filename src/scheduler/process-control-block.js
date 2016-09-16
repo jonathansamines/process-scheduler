@@ -26,7 +26,7 @@ class ProcessControlBlock extends EventEmitter {
     this.processor = null;
 
     // allocate random memory
-    this.memory = Math.ceil(Math.random() * 1000);
+    this.memory = Math.ceil(Math.random() * 10000);
 
     // next PCB in the queue set to null
     this.next = null;
@@ -140,8 +140,6 @@ class ProcessControlBlock extends EventEmitter {
 
   finish() {
     debug('trying to terminate the process [%s]', this.PID);
-
-    console.log(this.state);
 
     if (this.state === states.RUNNING) {
       debug('process [%s] completed', this.PID);
