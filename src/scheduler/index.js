@@ -17,14 +17,15 @@ const internals = {
 };
 
 internals.processQueue = (options) => {
+  debug('processing queue [%s] to [%s]', options.origin.name, options.target.name);
+
   const nextProcess = () => {
-    debug('trying to move process from [%s] to [%s]', options.origin.name, options.target.name);
     const originQueue = internals.queues[options.origin.name];
     const pcb = originQueue[originQueue.length - 1];
 
     if (pcb !== undefined) {
       if (options.shouldTransition(options.origin, options.target, pcb)) {
-        debug('moving process from [%s] to [%s]', options.origin.name, options.target.name);
+        debug('moving process [%s] from [%s] to [%s]', pcb.PID, options.origin.name, options.target.name);
 
         internals.queues[options.target.name].push(originQueue.pop());
         options.reporter.emit(`transition:${options.target.name.toLowerCase()}`, pcb, options.target);
@@ -61,7 +62,7 @@ class Scheduler extends EventEmitter {
   run(processor, memory) {
     this.once('transition:running', (pcbAllowedToRun) => {
       pcbAllowedToRun.on('state-changed', (pcb, origin, target) => {
-        debug('moving process to ', pcb.state.name);
+        debug('moving process [%s] to ', pcb.PID, pcb.state.name);
 
         if (target === states.TERMINATED) return;
         internals.processQueue({
@@ -81,7 +82,7 @@ class Scheduler extends EventEmitter {
       target: states.RUNNING,
       shouldTransition(origin, target, proc) {
         try {
-          debug('trying to allocate computing resources for process [%s, %s]', proc.memory, proc.computingTime);
+          debug('trying to allocate computing resources for process [%s](%s bytes)', proc.PID, proc.memory);
 
           memory.allocate(proc.memory);
           processor.compute(proc.computingTime);
@@ -91,7 +92,7 @@ class Scheduler extends EventEmitter {
 
           return true;
         } catch (e) {
-          debug('Disallowing transition to %s due insufficient resorces', target.name);
+          debug('Disallowing process [%s] transition to %s due insufficient resorces', proc.PID, target.name);
           debug(e);
 
           return false;

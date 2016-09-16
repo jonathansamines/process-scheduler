@@ -31,16 +31,6 @@ class ProcessControlBlock extends EventEmitter {
     // next PCB in the queue set to null
     this.next = null;
 
-    let isComputingAllowed = true;
-    const conditionalCompute = () => {
-      return (cb) => {
-        if (isComputingAllowed) {
-          isComputingAllowed = false;
-          this.process.compute(cb);
-        }
-      };
-    };
-
     this.once('started', () => {
       if (this.process.needsResource) {
         const externalEventTimeout = Math.ceil(Math.random() * 4000);
@@ -54,8 +44,6 @@ class ProcessControlBlock extends EventEmitter {
 
           this.process.needsResource = false;
           this.resume();
-
-          conditionalCompute(this.finish.bind(this));
         }, externalEventTimeout);
       }
 
@@ -65,16 +53,17 @@ class ProcessControlBlock extends EventEmitter {
         clearTimeout(this._waitToResume);
 
         this.interrupt();
-        isComputingAllowed = false;
       }, this.quantum);
 
-      debug('scheduling process [%s] termination', this.PID);
+      debug('starting process [%s] computing', this.PID);
 
-      conditionalCompute(() => {
+      this.process.compute(() => {
         clearTimeout(this._waitToInterrupt);
         clearTimeout(this._waitToResume);
 
-        this.finish();
+        if (this.state === states.RUNNING) {
+          this.finish();
+        }
       });
     });
   }
@@ -149,6 +138,8 @@ class ProcessControlBlock extends EventEmitter {
 
   finish() {
     debug('trying to terminate the process [%s]', this.PID);
+
+    console.log(this.state);
 
     if (this.state === states.RUNNING) {
       debug('process [%s] completed', this.PID);

@@ -23,21 +23,21 @@ system.on('state:resources-available', (processor, memory) => {
 
   scheduler.run(processor, memory);
 
-  scheduler.on('transition:terminated', (pcb, reason) => {
-    console.log('Process completed. Reason: %s', reason.state);
-  });
-
-  scheduler.on('transition:waiting', (pcb) => {
-    console.log('Process [%s] waiting for external event', pcb.PID);
-  });
-
-  scheduler.on('transition:running', (pcb) => {
-    console.log('Process [%s] running ', pcb.PID);
-  });
-
-  scheduler.on('transition:ready', (pcb) => {
-    console.log('Process [%s] ready to be allocated', pcb.PID);
-  });
+  // scheduler.on('transition:terminated', (pcb, reason) => {
+  //   console.log('Process completed. Reason: %s', reason.state);
+  // });
+  //
+  // scheduler.on('transition:waiting', (pcb) => {
+  //   console.log('Process [%s] waiting for external event', pcb.PID);
+  // });
+  //
+  // scheduler.on('transition:running', (pcb) => {
+  //   console.log('Process [%s] running ', pcb.PID);
+  // });
+  //
+  // scheduler.on('transition:ready', (pcb) => {
+  //   console.log('Process [%s] ready to be allocated', pcb.PID);
+  // });
 });
 
 for (const number of [1, 2, 3]) {
@@ -50,12 +50,13 @@ for (const number of [1, 2, 3]) {
     name: `the-process-${number}`,
     compute: (cb) => {
       const timeout = Math.ceil(Math.random() * 10) * quantum;
+      console.log('Computing time: ', timeout);
       setTimeout(cb, timeout);
     },
   });
 
   scheduler.schedule({ PID, quantum, priority }, newProcess);
-  scheduler.on('transition:new', (pcb) => {
-    console.log('New process [%s] created.', pcb.PID);
-  });
+  // scheduler.on('transition:new', (pcb) => {
+  //   console.log('New process [%s] created.', pcb.PID);
+  // });
 }

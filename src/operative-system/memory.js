@@ -7,7 +7,7 @@ class PrimaryMemory {
     this.capacity = capacity;
     this.consumedMemory = 0;
 
-    debug('creating memory with %s capacity', capacity);
+    debug('creating memory with %s bytes of capacity', capacity);
   }
 
   /**
@@ -31,7 +31,7 @@ class PrimaryMemory {
     if (resultingMemory <= this.capacity) {
       this.consumedMemory += realMemoryToAllocate;
 
-      debug('allocated memory bytes: ', realMemoryToAllocate);
+      debug('allocated memory %s bytes', realMemoryToAllocate);
 
       return;
     }
@@ -47,7 +47,7 @@ class PrimaryMemory {
   deAllocate(memoryToDeAllocate) {
     const resultingMemory = this.consumedMemory - Math.abs(memoryToDeAllocate);
 
-    debug('deallocating memory ', memoryToDeAllocate);
+    debug('deallocating memory %s bytes', memoryToDeAllocate);
 
     this.consumedMemory = resultingMemory < 0 ? 0 : resultingMemory;
   }
