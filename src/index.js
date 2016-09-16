@@ -43,7 +43,7 @@ system.on('state:resources-available', (processor, memory) => {
   // });
 });
 
-const processCounter = new Array(20);
+const processCounter = new Array(1);
 for (const pair of processCounter.entries()) {
   const number = pair[0];
   const PID = system.generatePID();
@@ -55,7 +55,8 @@ for (const pair of processCounter.entries()) {
     computingTime,
     fileName: `/path/to/the-file-${number}`,
     name: `the-process-${number}`,
-    compute: (cb) => {
+    compute(cb) {
+      console.log('comp .. ', this.computingTime);
       return setTimeout(cb, this.computingTime);
     },
   });

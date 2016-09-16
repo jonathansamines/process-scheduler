@@ -1,57 +1,22 @@
 {
   "NEW":{
     "name":"NEW",
-    "description":"A new process is created",
-    "transitions":[
-      {
-        "name":"ADMITTED",
-        "description":"The new process was admitted by the OS"
-      }
-    ]
+    "description":"A new process is created"
   },
   "READY":{
     "name":"READY",
-    "description":"Process is ready to be assigned",
-    "transitions":[
-      {
-        "name":"RUN",
-        "description":"The process resources assignment is done."
-      }
-    ]
+    "description":"Process is ready to be assigned"
   },
   "RUNNING":{
     "name":"RUNNING",
-    "description":"The process is running and its resources have been assigned",
-    "transitions":[
-      {
-        "name":"EXIT",
-        "description":"The process has either exited as completed or an error has ocurred"
-      },
-      {
-        "name":"BLOCK",
-        "description":"The process is waiting for an external operation to finish"
-      },
-      {
-        "name":"INTERRUPTED",
-        "description":"The process execution has been interrupted"
-      }
-    ]
+    "description":"The process is running and its resources have been assigned"
   },
   "WAITING":{
     "name":"WAITING",
-    "description":"Process is waiting for an external event to finish",
-    "transitions":[
-      {
-        "name":"RESUMED",
-        "description":"The process waiting for an external action has finished"
-      }
-    ]
+    "description":"Process is waiting for an external event to finish"
   },
   "TERMINATED":{
     "name":"TERMINATED",
-    "description":"Process finished",
-    "transitions":[
-
-    ]
+    "description":"Process finished"
   }
 }

@@ -4,7 +4,8 @@ const debug = require('debug')('process-scheduler:operative-system/process');
 
 class Process {
   constructor(options) {
-    debug('creating process [%s] for [%s]', options.name, options.fileName);
+    debug('creating process [%s] for [%s] with computing time of %s',
+      options.name, options.fileName, options.computingTime);
 
     this.fileName = options.fileName;
     this.name = options.name;
@@ -30,7 +31,7 @@ class Process {
     debug('starting logical process with computing time %s', this.computingTime);
 
     this._computeCancellation = this._compute(() => {
-      this.computingTime = Date.now() - this._processStartTime;
+      this.computingTime -= Date.now() - this._processStartTime;
       return callback();
     });
 
@@ -39,11 +40,13 @@ class Process {
 
   cancel() {
     this.computingTime -= Date.now() - this._processStartTime;
-    this._processStartTime = null;
 
     debug('cancelling logical process. Remaining computing time %s ms', this.computingTime);
 
     clearTimeout(this._computeCancellation);
+
+    this._processStartTime = null;
+    this._computeCancellation = null;
   }
 }
 

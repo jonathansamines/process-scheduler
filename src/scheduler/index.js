@@ -6,28 +6,31 @@ const states = require('./states');
 const ControlBlock = require('./process-control-block');
 
 const internals = {
-  SCHEDULE_INTERVAL: 10000,
+  SCHEDULE_INTERVAL: 1000 * 5,
   queues: {
     NEW: [],
-    TERMINATED: [],
-    RUNNING: [],
     READY: [],
+    RUNNING: [],
     WAITING: [],
+    TERMINATED: [],
   },
 };
 
-internals.processQueue = (options) => {
+internals.transitionTo = (options) => {
   debug('processing queue [%s]', options.origin.name);
+
+  const evalTransition = options.evalTransition || (() => true);
 
   const nextProcess = () => {
     const originQueue = internals.queues[options.origin.name];
+    const targetQueue = internals.queues[options.target.name];
     const pcb = originQueue[originQueue.length - 1];
 
     if (pcb !== undefined) {
-      if (options.shouldTransition(options.origin, options.target, pcb)) {
+      if (evalTransition(pcb, options.origin, options.target)) {
         debug('moving process [%s] from [%s] to [%s]', pcb.PID, options.origin.name, options.target.name);
 
-        internals.queues[options.target.name].push(originQueue.pop());
+        targetQueue.push(originQueue.pop());
         options.reporter.emit(`transition:${options.target.name.toLowerCase()}`, pcb, options.target);
         options.reporter.emit('transition', pcb, options.target);
       }
@@ -49,27 +52,16 @@ class Scheduler extends EventEmitter {
 
     debug('creating scheduler [%s] with interval of %ds', this.id, this.scheduleInterval / 1000);
 
-    internals.processQueue({
+    internals.transitionTo({
       reporter: this,
       origin: states.NEW,
       target: states.READY,
-      interval: this.scheduleInterval,
-      shouldTransition: () => true,
-    });
+      interval: 100,
+      evalTransition(pcb) {
+        pcb.admit();
 
-    this.once('transition:running', (pcbAllowedToRun) => {
-      pcbAllowedToRun.on('state-changed', (pcb, origin, target) => {
-        if (target === states.TERMINATED) return;
-        internals.processQueue({
-          origin,
-          target,
-          reporter: this,
-          interval: this.scheduleInterval,
-          shouldTransition: () => true,
-        });
-      });
-
-      pcbAllowedToRun.start();
+        return true;
+      },
     });
   }
 
@@ -86,17 +78,29 @@ class Scheduler extends EventEmitter {
   }
 
   run(processor, memory) {
-    internals.processQueue({
+    const self = this;
+
+    const processTransaction = (p, origin, target) => {
+      internals.transitionTo({
+        origin,
+        target,
+        reporter: self,
+        interval: self.scheduleInterval,
+      });
+    };
+
+    internals.transitionTo({
       reporter: this,
       origin: states.READY,
       target: states.RUNNING,
       interval: this.scheduleInterval,
-      shouldTransition(origin, target, pcb) {
+      evalTransition(pcb, origin, target) {
         try {
           debug('trying to allocate computing resources for process [%s](%s bytes)', pcb.PID, pcb.memoryConsumption);
 
           pcb.assignProcessor(processor);
           pcb.assignMemory(memory);
+          pcb.start();
 
           memory.allocate(pcb.memoryConsumption);
           processor.compute(pcb.process.computingTime, () => {
@@ -106,8 +110,15 @@ class Scheduler extends EventEmitter {
             memory.deAllocate(pcb.memoryConsumption);
           });
 
+          pcb.removeListener('state-changed', processTransaction);
+          pcb.on('state-changed', processTransaction);
+
           return true;
         } catch (e) {
+          pcb.deAssignProcessor();
+          pcb.deAssignMemory();
+          memory.deAllocate(pcb.memoryConsumption);
+
           debug('Disallowing process [%s] transition to %s due insufficient resorces', pcb.PID, target.name);
           debug(e);
 
