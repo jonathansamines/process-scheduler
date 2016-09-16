@@ -74,6 +74,7 @@ class Scheduler extends EventEmitter {
 
     debug('new PCB created with ID %s and quantum duration of %dms', controlBlock.PID, controlBlock.quantum);
 
+    this.emit(`transition:${controlBlock.state.name.toLowerCase()}`, controlBlock);
     internals.queues[controlBlock.state.name].push(controlBlock);
   }
 

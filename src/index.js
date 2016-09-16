@@ -30,23 +30,39 @@ system.on('state:resources-available', (processor, memory) => {
 });
 
 scheduler.on('transition:new', (pcb) => {
-  console.log('New process [%s] created.', pcb.PID);
+  console.log('New process [%s] created with (time=%sms, memory=%sbytes, quantum=%sms)',
+    pcb.PID,
+    pcb.process.computingTime,
+    pcb.memoryConsumption,
+    pcb.quantum);
 });
 
 scheduler.on('transition:terminated', (pcb, reason) => {
-  console.log('Process completed. Reason: %s', reason.state);
+  console.log('Process completed. Reason: %s', reason);
 });
 
 scheduler.on('transition:waiting', (pcb) => {
-  console.log('Process [%s] waiting for external event', pcb.PID);
+  console.log('Process [%s] waiting for external event with (time=%sms, memory=%sbytes, quantum=%sms)',
+    pcb.PID,
+    pcb.process.computingTime,
+    pcb.memoryConsumption,
+    pcb.quantum);
 });
 
 scheduler.on('transition:running', (pcb) => {
-  console.log('Process [%s] running ', pcb.PID);
+  console.log('Process [%s] running with (time=%sms, memory=%sbytes, quantum=%sms)',
+    pcb.PID,
+    pcb.process.computingTime,
+    pcb.memoryConsumption,
+    pcb.quantum);
 });
 
 scheduler.on('transition:ready', (pcb) => {
-  console.log('Process [%s] ready to be allocated', pcb.PID);
+  console.log('Process [%s] ready to be allocated with (time=%sms, memory=%sbytes, quantum=%sms)',
+    pcb.PID,
+    pcb.process.computingTime,
+    pcb.memoryConsumption,
+    pcb.quantum);
 });
 
 const processCounter = new Array(1);
