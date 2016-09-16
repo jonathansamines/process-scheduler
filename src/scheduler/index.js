@@ -32,7 +32,7 @@ internals.processQueue = (options) => {
         options.reporter.emit('transition', pcb, options.target);
       }
 
-      setTimeout(nextProcess, internals.SCHEDULE_INTERVAL);
+      setTimeout(nextProcess, options.interval);
     }
   };
 
@@ -40,17 +40,20 @@ internals.processQueue = (options) => {
 };
 
 class Scheduler extends EventEmitter {
-  constructor() {
+  constructor(options) {
     super();
 
+    options = options || {};
+    this.scheduleInterval = options.scheduleInterval || internals.SCHEDULE_INTERVAL;
     this.id = Date.now();
 
-    debug('creating scheduler [%s]', this.id);
+    debug('creating scheduler [%s] with interval of %ds', this.id, this.scheduleInterval / 1000);
 
     internals.processQueue({
       reporter: this,
       origin: states.NEW,
       target: states.READY,
+      interval: this.scheduleInterval,
       shouldTransition: () => true,
     });
 
@@ -61,6 +64,7 @@ class Scheduler extends EventEmitter {
           origin,
           target,
           reporter: this,
+          interval: this.scheduleInterval,
           shouldTransition: () => true,
         });
       });
@@ -86,6 +90,7 @@ class Scheduler extends EventEmitter {
       reporter: this,
       origin: states.READY,
       target: states.RUNNING,
+      interval: this.scheduleInterval,
       shouldTransition(origin, target, pcb) {
         try {
           debug('trying to allocate computing resources for process [%s](%s bytes)', pcb.PID, pcb.memoryConsumption);

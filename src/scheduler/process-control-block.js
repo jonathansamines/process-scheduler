@@ -20,7 +20,6 @@ class ProcessControlBlock extends EventEmitter {
     this.PID = meta.PID;
     this.quantum = meta.quantum || 0;
     this.priority = meta.priority || 0;
-    this.pointerControl = 0;
     this.process = processToSchedule;
     this.state = states.NEW;
 
