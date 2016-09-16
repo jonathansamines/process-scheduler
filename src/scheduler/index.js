@@ -43,6 +43,10 @@ class Scheduler extends EventEmitter {
   constructor() {
     super();
 
+    this.id = Date.now();
+
+    debug('creating scheduler [%s]', this.id);
+
     internals.processQueue({
       reporter: this,
       origin: states.NEW,
@@ -89,10 +93,13 @@ class Scheduler extends EventEmitter {
           debug('trying to allocate computing resources for process [%s](%s bytes)', proc.PID, proc.memory);
 
           memory.allocate(proc.memory);
-          processor.compute(proc.computingTime);
 
           // assign resources to pcb
           proc.processor = processor;
+          processor.compute(proc.process.computingTime, () => {
+            proc.processor = null;
+            memory.deAllocate(proc.memory);
+          });
 
           return true;
         } catch (e) {

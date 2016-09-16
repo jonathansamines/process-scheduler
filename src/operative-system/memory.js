@@ -6,8 +6,10 @@ class PrimaryMemory {
   constructor(capacity) {
     this.capacity = capacity;
     this.consumedMemory = 0;
+    this.id = Date.now();
 
-    debug('creating memory with %s bytes of capacity', capacity);
+    const humanReadableCapacity = capacity / Math.pow(1024, 3);
+    debug('creating memory [%s] with %s gb of capacity', this.id, humanReadableCapacity);
   }
 
   /**
@@ -31,7 +33,7 @@ class PrimaryMemory {
     if (resultingMemory <= this.capacity) {
       this.consumedMemory += realMemoryToAllocate;
 
-      debug('allocated memory %s bytes', realMemoryToAllocate);
+      debug('allocated %s bytes on memory [%s]', realMemoryToAllocate, this.id);
 
       return;
     }
@@ -47,7 +49,7 @@ class PrimaryMemory {
   deAllocate(memoryToDeAllocate) {
     const resultingMemory = this.consumedMemory - Math.abs(memoryToDeAllocate);
 
-    debug('deallocating memory %s bytes', memoryToDeAllocate);
+    debug('deallocating %s bytes on memory [%s]', memoryToDeAllocate, this.id);
 
     this.consumedMemory = resultingMemory < 0 ? 0 : resultingMemory;
   }

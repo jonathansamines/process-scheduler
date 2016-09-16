@@ -6,8 +6,9 @@ const Process = require('./operative-system/process');
 const Processor = require('./operative-system/processor');
 const Scheduler = require('./scheduler');
 
-const PRIMARY_MEMORY_CAPACITY = 4096;
-const primaryProcessor = new Processor();
+const PRIMARY_MEMORY_CAPACITY = Math.pow(1024, 3) * 1;
+const PRIMARY_PROCESSOR_CAPACITY = Math.pow(1024, 3) * 1.3;
+const primaryProcessor = new Processor(PRIMARY_PROCESSOR_CAPACITY);
 const primaryMemory = new PrimaryMemory(PRIMARY_MEMORY_CAPACITY);
 const scheduler = new Scheduler();
 const system = new System({
@@ -42,7 +43,9 @@ system.on('state:resources-available', (processor, memory) => {
   // });
 });
 
-for (const number of [1, 2, 3]) {
+const processCounter = new Array(20);
+for (const pair of processCounter.entries()) {
+  const number = pair[0];
   const PID = system.generatePID();
   const quantum = Math.ceil(Math.random() * 50) * 100;
   const computingTime = Math.ceil(Math.random() * 10) * quantum;
