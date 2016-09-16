@@ -22,7 +22,7 @@ system.on('state:insufficient-resources', (err) => {
 });
 
 system.on('state:resources-available', (processor, memory) => {
-  console.log('Resources available to be allocated.');
+  // console.log('Resources available to be allocated.');
 
   scheduler.run(processor, memory);
 
