@@ -126,8 +126,6 @@ class ProcessControlBlock extends EventEmitter {
         clearTimeout(this._waitToInterrupt);
         clearTimeout(this._waitToResume);
 
-        console.log('so, doing this again?');
-
         this.terminate();
       });
     });
