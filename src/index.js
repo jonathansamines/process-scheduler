@@ -11,7 +11,7 @@ const PRIMARY_PROCESSOR_CAPACITY = Math.pow(1024, 3) * 1.3; // 1.3GHZ
 const primaryProcessor = new Processor(PRIMARY_PROCESSOR_CAPACITY);
 const primaryMemory = new PrimaryMemory(PRIMARY_MEMORY_CAPACITY);
 const scheduler = new Scheduler({
-  // scheduleInterval: 50,
+  // scheduleInterval: 5,
 });
 const system = new System({
   processors: [primaryProcessor],
@@ -24,25 +24,29 @@ system.on('state:insufficient-resources', (err) => {
 });
 
 system.on('state:resources-available', (processor, memory) => {
-  // console.log('Resources available to be allocated.');
+  console.log('Resources available to be allocated.');
 
   scheduler.run(processor, memory);
+});
 
-  // scheduler.on('transition:terminated', (pcb, reason) => {
-  //   console.log('Process completed. Reason: %s', reason.state);
-  // });
-  //
-  // scheduler.on('transition:waiting', (pcb) => {
-  //   console.log('Process [%s] waiting for external event', pcb.PID);
-  // });
-  //
-  // scheduler.on('transition:running', (pcb) => {
-  //   console.log('Process [%s] running ', pcb.PID);
-  // });
-  //
-  // scheduler.on('transition:ready', (pcb) => {
-  //   console.log('Process [%s] ready to be allocated', pcb.PID);
-  // });
+scheduler.on('transition:new', (pcb) => {
+  console.log('New process [%s] created.', pcb.PID);
+});
+
+scheduler.on('transition:terminated', (pcb, reason) => {
+  console.log('Process completed. Reason: %s', reason.state);
+});
+
+scheduler.on('transition:waiting', (pcb) => {
+  console.log('Process [%s] waiting for external event', pcb.PID);
+});
+
+scheduler.on('transition:running', (pcb) => {
+  console.log('Process [%s] running ', pcb.PID);
+});
+
+scheduler.on('transition:ready', (pcb) => {
+  console.log('Process [%s] ready to be allocated', pcb.PID);
 });
 
 const processCounter = new Array(1);
@@ -63,7 +67,4 @@ for (const pair of processCounter.entries()) {
   });
 
   scheduler.schedule({ PID, quantum, priority }, newProcess);
-  // scheduler.on('transition:new', (pcb) => {
-  //   console.log('New process [%s] created.', pcb.PID);
-  // });
 }
