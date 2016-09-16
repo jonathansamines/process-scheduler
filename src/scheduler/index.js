@@ -56,8 +56,6 @@ class Scheduler extends EventEmitter {
 
     this.once('transition:running', (pcbAllowedToRun) => {
       pcbAllowedToRun.on('state-changed', (pcb, origin, target) => {
-        debug('moving process [%s] to ', pcb.PID, pcb.state.name);
-
         if (target === states.TERMINATED) return;
         internals.processQueue({
           origin,
@@ -88,22 +86,24 @@ class Scheduler extends EventEmitter {
       reporter: this,
       origin: states.READY,
       target: states.RUNNING,
-      shouldTransition(origin, target, proc) {
+      shouldTransition(origin, target, pcb) {
         try {
-          debug('trying to allocate computing resources for process [%s](%s bytes)', proc.PID, proc.memory);
+          debug('trying to allocate computing resources for process [%s](%s bytes)', pcb.PID, pcb.memoryConsumption);
 
-          memory.allocate(proc.memory);
+          pcb.assignProcessor(processor);
+          pcb.assignMemory(memory);
 
-          // assign resources to pcb
-          proc.processor = processor;
-          processor.compute(proc.process.computingTime, () => {
-            proc.processor = null;
-            memory.deAllocate(proc.memory);
+          memory.allocate(pcb.memoryConsumption);
+          processor.compute(pcb.process.computingTime, () => {
+            pcb.deAssignProcessor();
+            pcb.deAssignMemory();
+
+            memory.deAllocate(pcb.memory);
           });
 
           return true;
         } catch (e) {
-          debug('Disallowing process [%s] transition to %s due insufficient resorces', proc.PID, target.name);
+          debug('Disallowing process [%s] transition to %s due insufficient resorces', pcb.PID, target.name);
           debug(e);
 
           return false;

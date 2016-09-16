@@ -15,7 +15,7 @@ class System extends EventEmitter {
     this.memorySlots = options.memorySlots || [];
     this.devices = [];
 
-    debug('setting operative system with [%s] primary memories and [%] processors', this.processors.length, this.memorySlots.length);
+    debug('setting operative system with [%s] primary memories and [%s] processors', this.processors.length, this.memorySlots.length);
 
     let availableProcessor;
     let availableMemory;

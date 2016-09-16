@@ -23,10 +23,13 @@ class ProcessControlBlock extends EventEmitter {
     this.pointerControl = 0;
     this.process = processToSchedule;
     this.state = states.NEW;
-    this.processor = null;
+
+    // internal state
+    this._assignedProcessor = null;
+    this._assignedMemory = null;
 
     // allocate random memory
-    this.memory = Math.ceil(Math.random() * 10000);
+    this.memoryConsumption = Math.ceil(Math.random() * 10000);
 
     // next PCB in the queue set to null
     this.next = null;
@@ -68,6 +71,30 @@ class ProcessControlBlock extends EventEmitter {
         }
       });
     });
+  }
+
+  assignProcessor(processor) {
+    debug('assigned processor [%s] to process [%s]', processor.id, this.PID);
+
+    this._assignedProcessor = processor;
+  }
+
+  deAssignProcessor() {
+    debug('de-assigned processor [%s] to process [%s]', this._assignedProcessor.id, this.PID);
+
+    this._assignedProcessor = null;
+  }
+
+  assignMemory(primaryMemory) {
+    debug('assigned memory [%s] to process [%s]', primaryMemory.id, this.PID);
+
+    this._assignedMemory = primaryMemory;
+  }
+
+  deAssignMemory() {
+    debug('de-assigned memory [%s] to process [%s]', this._assignedMemory, this.PID);
+
+    this._assignedMemory = null;
   }
 
   interrupt() {

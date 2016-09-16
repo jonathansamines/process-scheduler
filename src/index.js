@@ -6,8 +6,8 @@ const Process = require('./operative-system/process');
 const Processor = require('./operative-system/processor');
 const Scheduler = require('./scheduler');
 
-const PRIMARY_MEMORY_CAPACITY = Math.pow(1024, 3) * 1;
-const PRIMARY_PROCESSOR_CAPACITY = Math.pow(1024, 3) * 1.3;
+const PRIMARY_MEMORY_CAPACITY = Math.pow(1024, 3) * 1; // 1GB
+const PRIMARY_PROCESSOR_CAPACITY = Math.pow(1024, 3) * 1.3; // 1.3GHZ
 const primaryProcessor = new Processor(PRIMARY_PROCESSOR_CAPACITY);
 const primaryMemory = new PrimaryMemory(PRIMARY_MEMORY_CAPACITY);
 const scheduler = new Scheduler();
