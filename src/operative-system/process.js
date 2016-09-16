@@ -20,11 +20,16 @@ class Process {
       throw new Error('The "compute" function was expected to receive a callback');
     }
 
-    this.compute = options.compute;
+    this._compute = options.compute;
   }
 
   run() {
-    return this.compute.apply(this.compute, arguments);
+    this._computeCancellation = this._compute.apply(this.compute, arguments);
+    return this._computeCancellation;
+  }
+
+  cancel() {
+    clearTimeout(this._computeCancellation);
   }
 }
 

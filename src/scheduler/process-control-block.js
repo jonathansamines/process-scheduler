@@ -44,6 +44,7 @@ class ProcessControlBlock extends EventEmitter {
 
           this.process.needsResource = false;
           this.resume();
+          this.process.cancel();
         }, externalEventTimeout);
       }
 
@@ -51,13 +52,14 @@ class ProcessControlBlock extends EventEmitter {
 
       this._waitToInterrupt = setTimeout(() => {
         clearTimeout(this._waitToResume);
+        this.process.cancel();
 
         this.interrupt();
       }, this.quantum);
 
       debug('starting process [%s] computing', this.PID);
 
-      this.process.compute(() => {
+      this.process.run(() => {
         clearTimeout(this._waitToInterrupt);
         clearTimeout(this._waitToResume);
 

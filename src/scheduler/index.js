@@ -40,26 +40,16 @@ internals.processQueue = (options) => {
 };
 
 class Scheduler extends EventEmitter {
+  constructor() {
+    super();
 
-  /**
-   * Schedule a new process
-   * @return {PCB} Returns the new PCB allocated for the provided process.
-   */
-  schedule(meta, processToSchedule) {
-    const controlBlock = new ControlBlock(meta, processToSchedule);
-
-    debug('new PCB created with ID %s and quantum duration of %dms', controlBlock.PID, controlBlock.quantum);
-
-    internals.queues[controlBlock.state.name].push(controlBlock);
     internals.processQueue({
       reporter: this,
       origin: states.NEW,
       target: states.READY,
       shouldTransition: () => true,
     });
-  }
 
-  run(processor, memory) {
     this.once('transition:running', (pcbAllowedToRun) => {
       pcbAllowedToRun.on('state-changed', (pcb, origin, target) => {
         debug('moving process [%s] to ', pcb.PID, pcb.state.name);
@@ -75,7 +65,21 @@ class Scheduler extends EventEmitter {
 
       pcbAllowedToRun.start();
     });
+  }
 
+  /**
+   * Schedule a new process
+   * @return {PCB} Returns the new PCB allocated for the provided process.
+   */
+  schedule(meta, processToSchedule) {
+    const controlBlock = new ControlBlock(meta, processToSchedule);
+
+    debug('new PCB created with ID %s and quantum duration of %dms', controlBlock.PID, controlBlock.quantum);
+
+    internals.queues[controlBlock.state.name].push(controlBlock);
+  }
+
+  run(processor, memory) {
     internals.processQueue({
       reporter: this,
       origin: states.READY,

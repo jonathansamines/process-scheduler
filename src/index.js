@@ -51,7 +51,7 @@ for (const number of [1, 2, 3]) {
     compute: (cb) => {
       const timeout = Math.ceil(Math.random() * 10) * quantum;
       console.log('Computing time: ', timeout);
-      setTimeout(cb, timeout);
+      return setTimeout(cb, timeout);
     },
   });
 
