@@ -98,7 +98,7 @@ class Scheduler extends EventEmitter {
             pcb.deAssignProcessor();
             pcb.deAssignMemory();
 
-            memory.deAllocate(pcb.memory);
+            memory.deAllocate(pcb.memoryConsumption);
           });
 
           return true;
