@@ -31,8 +31,8 @@ internals.transitionTo = (options) => {
         debug('moving process [%s] from [%s] to [%s]', pcb.PID, options.origin.name, options.target.name);
 
         targetQueue.push(originQueue.pop());
-        options.reporter.emit(`transition:${options.target.name.toLowerCase()}`, pcb, options.target);
-        options.reporter.emit('transition', pcb, options.target);
+        options.reporter.emit(`transition:${options.target.name.toLowerCase()}`, pcb, options.origin, options.target);
+        options.reporter.emit('transition', pcb, options.origin, options.target);
       }
 
       setTimeout(nextProcess, options.interval);
@@ -74,7 +74,7 @@ class Scheduler extends EventEmitter {
 
     debug('new PCB created with ID %s and quantum duration of %dms', controlBlock.PID, controlBlock.quantum);
 
-    this.emit(`transition:${controlBlock.state.name.toLowerCase()}`, controlBlock);
+    this.emit(`transition:${controlBlock.state.name.toLowerCase()}`, controlBlock, null, states.NEW);
     internals.queues[controlBlock.state.name].push(controlBlock);
   }
 

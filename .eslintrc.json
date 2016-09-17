@@ -3,6 +3,10 @@
   "parserOptions": {
     "sourceType": "script"
   },
+  "env": {
+    "browser": true,
+    "node": true
+  },
   "rules": {
     "max-len": 0,
     "no-continue": 0,

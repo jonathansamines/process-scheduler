@@ -7,6 +7,7 @@
     "start": "node src/index.js",
     "test": "mocha",
     "build": "webpack --config view/webpack.config.js",
+    "build:watch": "webpack --config view/webpack.config.js --watch",
     "test:watch": "mocha . -w"
   },
   "keywords": [],
