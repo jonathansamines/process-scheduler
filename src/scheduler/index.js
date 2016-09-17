@@ -1,7 +1,7 @@
 'use strict';
 
+const EventEmitter = require('eventemitter2');
 const debug = require('debug')('process-scheduler:scheduler');
-const EventEmitter = require('events');
 const states = require('./states');
 const ControlBlock = require('./process-control-block');
 
@@ -39,7 +39,7 @@ internals.transitionTo = (options) => {
     }
   };
 
-  process.nextTick(nextProcess);
+  setTimeout(nextProcess, 0);
 };
 
 class Scheduler extends EventEmitter {

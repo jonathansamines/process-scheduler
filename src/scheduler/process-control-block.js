@@ -1,6 +1,6 @@
 'use strict';
 
-const EventEmitter = require('events');
+const EventEmitter = require('eventemitter2');
 const debug = require('debug')('process-scheduler:pcb');
 const states = require('./states');
 

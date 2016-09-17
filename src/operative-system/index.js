@@ -1,6 +1,6 @@
 'use strict';
 
-const EventEmitter = require('events');
+const EventEmitter = require('eventemitter2');
 const debug = require('debug')('process-scheduler:operative-system/index');
 
 const internals = {
@@ -34,7 +34,7 @@ class System extends EventEmitter {
       }
     };
 
-    process.nextTick(monitorResources);
+    setTimeout(monitorResources, 0);
   }
 
   /**
